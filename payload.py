@@ -61,15 +61,23 @@ class Wipe(Payload):
 
 # makes an annoying bell sound
 class Bell(Payload):
-    def __init__(self, infinite = False) -> None:
+    def __init__(self, delay = None) -> None:
         super().__init__()
-        self.did_print_already = False
-        self.infinite = infinite
+        self.last_print_time = 0
+        self.delay = delay
 
     def tick(self, printer):
-        # make sure it only gets executed once
-        if self.did_print_already and not self.infinite: return
-        self.did_print_already = True
+        current_time = time.time() * 1000
+        
+        if self.delay == None: 
+            # if we didn't specify a delay, only print once
+            if self.last_print_time != 0: return
+        
+        else:
+            # only print once every X millis
+            if current_time < self.last_print_time + self.delay: return
+        
+        self.last_print_time = current_time
 
         # Make the bell sound
         printer.print(BELL)

@@ -71,7 +71,7 @@ def main():
                 print(f"{RED.decode()}- {CYAN.decode()}exit {BLUE.decode()}: {CYAN.decode()}Stops the currently running payload and exits the program{RESET.decode()}")
                 print(f"{RED.decode()}- {CYAN.decode()}reset {BLUE.decode()}: {CYAN.decode()}Tries to recover the console from all the previous shenanigans{RESET.decode()}")
                 print(f"{RED.decode()}- {CYAN.decode()}wipe [permanent] {BLUE.decode()}: {CYAN.decode()}Wipes the console and all the previous content on it, if permanent is selected it will keep wiping the console{RESET.decode()}")
-                print(f"{RED.decode()}- {CYAN.decode()}bell [permanent] {BLUE.decode()}: {CYAN.decode()}Plays an annoying bell sound if the terminal supports it{RESET.decode()}")
+                print(f"{RED.decode()}- {CYAN.decode()}bell [loop <delay>] {BLUE.decode()}: {CYAN.decode()}Plays an annoying bell sound if the terminal supports it, optionally loops every <delay> milliseconds{RESET.decode()}")
                 print(f"{RED.decode()}- {CYAN.decode()}txt <payload> {BLUE.decode()}: {CYAN.decode()}Displays the payload to the target console{RESET.decode()}")
                 print(f"{RED.decode()}- {CYAN.decode()}ctxt <color> <payload> {BLUE.decode()}: {CYAN.decode()}Displays the payload to the target console in the desired color{RESET.decode()}")
                 print(f"{RED.decode()}- {CYAN.decode()}fulltxt <payload> {BLUE.decode()}: {CYAN.decode()}Displays the payload to the target console, wipes everything else{RESET.decode()}")
@@ -100,15 +100,20 @@ def main():
                     continue
                 current_payload = payload.Wipe(permanent)
             
-            elif command.startswith("bell"):
-                if command == "bell":
-                    permanent = False
-                elif command == "bell permanent":
-                    permanent = True
+            elif command == "bell" or command.startswith("bell "):
+                split = command.split(" ")
+                if len(split) == 1:
+                    delay = None
+                elif split[1] == "loop" and len(split) == 3:
+                    try:
+                        delay = int(split[2])
+                    except:
+                        print("Error: the delay must be a number!")
+                        continue
                 else:
-                    print("Usage: bell [permanent]")
+                    print("Usage: bell [loop <delay>]")
                     continue
-                current_payload = payload.Bell(permanent)
+                current_payload = payload.Bell(delay)
 
             elif command.startswith("txt "):
                 text = command.removeprefix("txt ")
