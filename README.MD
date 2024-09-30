@@ -17,5 +17,5 @@ Adding a new payload is also straightforward: Make a new class in payload.py tha
 
 ### TODO
 In case you want to contribute to this project but don't have any idea on what to add, here are some ideas:
-- [ ] Sending hyperlinks using OSC 8
+- [X] Sending hyperlinks using OSC 8
 - [ ] Image and GIF rendering using a graphics protocol such as sixel, I tried this before but couldn't find any cross-platform implementation that could transform the images in-memory.

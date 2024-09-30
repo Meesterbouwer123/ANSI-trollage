@@ -5,6 +5,8 @@ from printer import Printer
 ## ANSI codes
 BELL = b"\x07"
 ANSI_ESC = b"\x1b"
+ANSI_OSC = ANSI_ESC + b"]"
+ANSI_ST = ANSI_ESC + b"\\"
 RESET = ANSI_ESC + b"[0m"
 EREASE_SCREEN = ANSI_ESC + b"[2J"
 ENTER_INVISIBLE_MODE = ANSI_ESC + b"[8m"
@@ -22,6 +24,9 @@ MAGENTA = ANSI_ESC + b"[35m"
 CYAN = ANSI_ESC + b"[36m"
 WHITE = ANSI_ESC + b"[37m"
 DEFAULT = ANSI_ESC + b"[39m"
+
+# Proprietary Escape Codes
+OSC8_LINK_END = ANSI_OSC + b"8;;" + ANSI_ST
 
 ## payload classes
 
@@ -42,7 +47,7 @@ class Reset(Payload):
         self.did_print_already = True
 
         # try to restore the screen to its original state
-        printer.print(EXIT_INVISIBLE_MODE + RESET)
+        printer.print(EXIT_INVISIBLE_MODE + OSC8_LINK_END + RESET)
 
 # wipes the entire screen and the history
 class Wipe(Payload):
@@ -227,3 +232,6 @@ def color_text(text: list[bytes], colors, i: int, band_size: int) -> list[bytes]
 
         i = (i + 1) % (band_size * len(colors))
     return result
+
+def format_link(url: bytes, text: bytes):
+    return ANSI_OSC + b"8;;" + url + ANSI_ST + text + OSC8_LINK_END

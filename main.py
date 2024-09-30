@@ -1,13 +1,10 @@
-from io import BytesIO
-import io
 import sys
 import threading
 import pyfiglet
-import sixel.converter
 # our own modules
 import printer
 import payload
-from payload import RED, RESET, CYAN, BLUE
+from payload import ANSI_OSC, ANSI_ST, OSC8_LINK_END, RED, RESET, CYAN, BLUE
 
 running = True
 current_payload = payload.Payload() # the default payload does nothing
@@ -81,6 +78,7 @@ def main():
                 print(f"{RED.decode()}- {CYAN.decode()}figlet <font> <text> {BLUE.decode()}: {CYAN.decode()}Displays the text as ascii art to the console, you can change the style using the font{RESET.decode()}")
                 print(f"{RED.decode()}- {CYAN.decode()}cfiglet <font> <color> <text> {BLUE.decode()}: {CYAN.decode()}Displays the colored text as ascii art to the console, you can change the style using the font{RESET.decode()}") 
                 print(f"{RED.decode()}- {CYAN.decode()}rgbfiglet <font> <speed> <band size> <text> {BLUE.decode()}: {CYAN.decode()}Displays big text with a rainbow gradient to the console, the rainbow speed and width are configurable{RESET.decode()}") 
+                print(f"{RED.decode()}- {CYAN.decode()}link <url> <text> {BLUE.decode()}: {CYAN.decode()}Displays a hyperlink with the specified text{RESET.decode()}") 
 
             elif command == "exit":
                 print("Shutting down...")
@@ -220,6 +218,22 @@ def main():
                 text = " ".join(split[4:])
                 figlet_text = figlet.renderText(text)
                 current_payload = payload.PrintRGBText(figlet_text.encode().split(b"\n"), speed, band_size)
+
+            elif command.startswith("link "):
+                split = command.split(" ")
+                if len(split) >= 4 and split[1] == "post":
+                    url = split[2]
+                    text = " ".join(split[3:])
+                    encoded = payload.format_link(url.encode(), text.encode())
+                    current_payload = payload.PrintText(encoded)
+                elif len(split) == 3 and split[1] == "start":
+                    # start a new link
+                    url = split[2]
+                    current_payload = payload.PrintText(ANSI_OSC + b"8;;" + url.encode() + ANSI_ST)
+                elif len(split) == 2 and split[1] == "stop":
+                    current_payload = payload.PrintText(OSC8_LINK_END)
+                else:
+                    print("You fucked up")
 
             elif command == "": pass
 
