@@ -6,6 +6,20 @@ If you manage to find this useful, please let me know :D
 If you are too stupid to find out how to use the help command, you are also too stupid to use this tool.
 This tool's most powerful feature is the ease with which you can add new targeted applications, so it's only really useful if you know how to code.
 
+## Text formatting:
+The idea is to have the normal text with style formattings in the middle. These style formattings will be words describing what formatting you want, placed between ( and ). To get an opening round bracket in the text you need to escape it with a backslash `\(`, an ending bracked doesn't need to be escaped. A backslash can be placed by escaping it again (like `\\`). 
+
+The final result will be in UTF-8 (maybe we can make this be decided by the printer later).
+
+Some examples:
+```
+(red)
+(reset) and (wipe)
+(link https://example.com) and (nolink)
+(bell)
+(CRLF)
+```
+
 ## For programmers:
 ### WTF is a printer
 A printer is an abstraction layer that can be used to print arbitrary bytes to another computer's terminal. Most payloads assume that this happens during the `print` call to give the right timings, so that's a thing to keep in mind.

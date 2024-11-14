@@ -2,9 +2,10 @@ import sys
 import threading
 import pyfiglet
 # our own modules
+import formatting
 import printer
 import payload
-from payload import ANSI_OSC, ANSI_ST, OSC8_LINK_END, RED, RESET, CYAN, BLUE
+from formatting import ANSI_OSC, ANSI_ST, OSC8_LINK_END, RED, RESET, CYAN, BLUE
 
 running = True
 current_payload = payload.Payload() # the default payload does nothing
@@ -47,6 +48,7 @@ def main():
     global running, current_payload
     
     p = get_printer()
+
     if p == None:
         print("Usage: %s <printer> [options]" % sys.argv[0])
         print("Available printers:")
@@ -113,6 +115,19 @@ def main():
                     continue
                 current_payload = payload.Bell(delay)
 
+            elif command.startswith("text "):
+                #TODO: add command arguments here
+                # possible arguments: `fill_mode`, `rgb_type`, `figlet_font`. these should be able to emulate the other commands.
+                text_to_print = command.removeprefix("text ")
+                try:
+                    formatted = formatting.parse_text(text_to_print)
+                except Exception as e:
+                    print("Error while parsing text: " + e.args[0])
+                    continue
+
+                current_payload = payload.PrintText(formatted)
+
+            # TODO: incorporate all of the following commands into the `text` command
             elif command.startswith("txt "):
                 text = command.removeprefix("txt ")
                 current_payload = payload.PrintText(text.encode())
@@ -122,7 +137,7 @@ def main():
                 if len(split) <= 2:
                     print("Usage: ctxt <color> <text>")
                     continue
-                color = payload.parse_color(split[1])
+                color = formatting.parse_color(split[1])
                 text = " ".join(split[2:])
                 current_payload = payload.PrintColoredText(text.encode(), color)
 
@@ -135,7 +150,7 @@ def main():
                 if len(split) <= 2:
                     print("Usage: cfulltxt <color> <text>")
                     continue
-                color = payload.parse_color(split[1])
+                color = formatting.parse_color(split[1])
                 text = " ".join(split[2:])
                 current_payload = payload.PrintFullscreenText(text.encode(), color)
             
@@ -191,7 +206,7 @@ def main():
                     print("Usage: cfiglet <font> <color> <text>")
                     continue
                 figlet = pyfiglet.Figlet(font=split[1])
-                color = payload.parse_color(split[2])
+                color = formatting.parse_color(split[2])
                 text = " ".join(split[3:])
                 figlet_text = figlet.renderText(text)
                 current_payload = payload.PrintFullscreenText(figlet_text.encode(), color)
@@ -224,7 +239,7 @@ def main():
                 if len(split) >= 4 and split[1] == "post":
                     url = split[2]
                     text = " ".join(split[3:])
-                    encoded = payload.format_link(url.encode(), text.encode())
+                    encoded = formatting.format_link(url.encode(), text.encode())
                     current_payload = payload.PrintText(encoded)
                 elif len(split) == 3 and split[1] == "start":
                     # start a new link

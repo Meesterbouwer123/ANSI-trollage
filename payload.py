@@ -1,32 +1,6 @@
 import time
-
+import formatting
 from printer import Printer
-
-## ANSI codes
-BELL = b"\x07"
-ANSI_ESC = b"\x1b"
-ANSI_OSC = ANSI_ESC + b"]"
-ANSI_ST = ANSI_ESC + b"\\"
-RESET = ANSI_ESC + b"[0m"
-EREASE_SCREEN = ANSI_ESC + b"[2J"
-ENTER_INVISIBLE_MODE = ANSI_ESC + b"[8m"
-EXIT_INVISIBLE_MODE = ANSI_ESC + b"[28m"
-RESET_CURSOR = ANSI_ESC + b"[H"
-RESET_CONSOLE = ANSI_ESC + b"c"
-
-# color codes
-BLACK = ANSI_ESC + b"[30m"
-RED = ANSI_ESC + b"[31m"
-GREEN = ANSI_ESC + b"[32m"
-YELLOW = ANSI_ESC + b"[33m"
-BLUE = ANSI_ESC + b"[34m"
-MAGENTA = ANSI_ESC + b"[35m"
-CYAN = ANSI_ESC + b"[36m"
-WHITE = ANSI_ESC + b"[37m"
-DEFAULT = ANSI_ESC + b"[39m"
-
-# Proprietary Escape Codes
-OSC8_LINK_END = ANSI_OSC + b"8;;" + ANSI_ST
 
 ## payload classes
 
@@ -47,7 +21,7 @@ class Reset(Payload):
         self.did_print_already = True
 
         # try to restore the screen to its original state
-        printer.print(EXIT_INVISIBLE_MODE + OSC8_LINK_END + RESET)
+        printer.print(formatting.EXIT_INVISIBLE_MODE + formatting.OSC8_LINK_END + formatting.RESET)
 
 # wipes the entire screen and the history
 class Wipe(Payload):
@@ -62,7 +36,7 @@ class Wipe(Payload):
         self.did_print_already = True
 
         # wipe the entire console
-        printer.print(RESET_CONSOLE)
+        printer.print(formatting.RESET_CONSOLE)
 
 # makes an annoying bell sound
 class Bell(Payload):
@@ -85,7 +59,7 @@ class Bell(Payload):
         self.last_print_time = current_time
 
         # Make the bell sound
-        printer.print(BELL)
+        printer.print(formatting.BELL)
 
 # print the text to the console, it will probably be surrounded by other text
 class PrintText(Payload):
@@ -116,7 +90,7 @@ class PrintColoredText(Payload):
         self.did_print_already = True
 
         # print the text to the console
-        printer.print(self.color + self.payload + RESET)
+        printer.print(self.color + self.payload + formatting.RESET)
 
 # print the text to the console, this will wipe the entire screen and hide everything after the text
 class PrintFullscreenText(Payload):
@@ -132,7 +106,7 @@ class PrintFullscreenText(Payload):
         self.did_print_already = True
 
         # print the text to the console
-        printer.print(RESET_CURSOR + EXIT_INVISIBLE_MODE + EREASE_SCREEN + self.color +  self.payload + RESET + ENTER_INVISIBLE_MODE)
+        printer.print(formatting.RESET_CURSOR + formatting.EXIT_INVISIBLE_MODE + formatting.EREASE_SCREEN + self.color +  self.payload + formatting.RESET + formatting.ENTER_INVISIBLE_MODE)
 
 # print the text to the console, this will wipe the entire screen and hide everything after the text
 class PrintRainbowText(Payload):
@@ -142,16 +116,6 @@ class PrintRainbowText(Payload):
         self.speed = speed
         self.last_print_time = 0
         self.i = 0
-        self.colors = [
-            BLACK,
-            RED,
-            GREEN,
-            YELLOW,
-            BLUE,
-            MAGENTA,
-            CYAN,
-            WHITE,
-        ]
 
     def tick(self, printer):
         # only print once every X millis
@@ -160,11 +124,11 @@ class PrintRainbowText(Payload):
         self.last_print_time = current_time
 
         # calculate next color
-        color = self.colors[self.i]
-        self.i = (self.i + 1) % len(self.colors)
+        color = formatting.COLORS[self.i]
+        self.i = (self.i + 1) % len(formatting.COLORS)
 
         # print the text to the console
-        printer.print(RESET_CURSOR + EXIT_INVISIBLE_MODE + EREASE_SCREEN + color + self.payload + RESET + ENTER_INVISIBLE_MODE)
+        printer.print(formatting.RESET_CURSOR + formatting.EXIT_INVISIBLE_MODE + formatting.EREASE_SCREEN + color + self.payload + formatting.RESET + formatting.ENTER_INVISIBLE_MODE)
 
 # prints multiple lines of text with a RGB gradient to the console, this will wipe the entire screen and hide everything after the text
 class PrintRGBText(Payload):
@@ -175,16 +139,6 @@ class PrintRGBText(Payload):
         self.band_size = band_size
         self.last_print_time = 0
         self.i = 0
-        self.colors = [
-            RED,
-            YELLOW,
-            GREEN,
-            BLUE,
-            MAGENTA,
-            CYAN,
-            WHITE,
-            BLACK,
-        ]
 
     def tick(self, printer):
         # only print once every X millis
@@ -193,27 +147,16 @@ class PrintRGBText(Payload):
         self.last_print_time = current_time
 
         # calculate next color
-        colored_lines = color_text(self.lines, self.colors, self.i, self.band_size)
+        colored_lines = color_text(self.lines, formatting.COLORS, self.i, self.band_size)
         self.i += 1
-        self.i %= self.band_size * len(self.colors)
+        self.i %= self.band_size * len(formatting.COLORS)
 
         # print the text to the console
-        printer.print(RESET_CURSOR + EXIT_INVISIBLE_MODE + EREASE_SCREEN + b"\n".join(colored_lines) + ENTER_INVISIBLE_MODE)
+        printer.print(formatting.RESET_CURSOR + formatting.EXIT_INVISIBLE_MODE + formatting.EREASE_SCREEN + b"\n".join(colored_lines) + formatting.ENTER_INVISIBLE_MODE)
 
 
 ## utility functions
-def parse_color(c: str):
-    c = c.lower()
-    if c == "black": return BLACK
-    elif c == "red": return RED
-    elif c == "green": return GREEN
-    elif c == "yellow": return YELLOW
-    elif c == "blue": return BLUE
-    elif c == "magenta": return MAGENTA
-    elif c == "cyan": return CYAN
-    elif c == "white": return WHITE
-    elif c == "default": return DEFAULT
-    else: return RESET
+
 
 # ugly code ahead, i hope to never have to debug this again
 def color_text(text: list[bytes], colors, i: int, band_size: int) -> list[bytes]:
@@ -228,10 +171,7 @@ def color_text(text: list[bytes], colors, i: int, band_size: int) -> list[bytes]
             if current_color_index < 0: current_color_index = len(colors) - 1
             new_line += colors[current_color_index] + line[line_index:line_index+band_size]
             line_index += band_size
-        result.append(new_line + RESET)
+        result.append(new_line + formatting.RESET)
 
         i = (i + 1) % (band_size * len(colors))
     return result
-
-def format_link(url: bytes, text: bytes):
-    return ANSI_OSC + b"8;;" + url + ANSI_ST + text + OSC8_LINK_END
