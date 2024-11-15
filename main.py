@@ -79,20 +79,22 @@ def main():
                 run_thread.join()
             
             elif command == "reset":
-                current_payload = payload.Reset()
+                reset_sequence = formatting.EXIT_INVISIBLE_MODE + formatting.OSC8_LINK_END + formatting.RESET
+                current_payload = payload.RawPayload(reset_sequence)
             
             elif command == "stop":
                 current_payload = payload.Payload() # the default paylaod does nothing
 
             elif command.startswith("wipe"):
                 if command == "wipe":
-                    permanent = False
+                    delay = None
                 elif command == "wipe permanent":
-                    permanent = True
+                    delay = 0 # this will give no delay
                 else:
                     print("Usage: wipe [permanent]")
                     continue
-                current_payload = payload.Wipe(permanent)
+
+                current_payload = payload.RawPayload(formatting.RESET_CONSOLE, delay=delay)
             
             elif command == "bell" or command.startswith("bell "):
                 split = command.split(" ")
@@ -107,7 +109,7 @@ def main():
                 else:
                     print("Usage: bell [loop <delay>]")
                     continue
-                current_payload = payload.Bell(delay)
+                current_payload = payload.RawPayload(formatting.BELL, delay=delay)
 
             elif command.startswith("text "):
                 command = command[len("text "):].strip()
