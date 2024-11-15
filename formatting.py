@@ -1,4 +1,7 @@
 ## ANSI codes
+import pyfiglet
+
+
 BELL = b"\x07"
 ANSI_ESC = b"\x1b"
 ANSI_OSC = ANSI_ESC + b"]"
@@ -56,11 +59,15 @@ formatting_codes = {
     "nolink": OSC8_LINK_END,
 
     # not ANSI, but may still be useful
-    "crlf": b"\r\n"
+    "crlf": b"\r\n",
+    "nop": b'', # does literally nothing, can be useful to start the payload with whitespace
 }
 
-def parse_text(input: str) -> bytes:
+# parse the text into a byte array that contains the required ANSI sequences
+# if the font is specified then only ANSI secuences are allowed at the start and end of the end of the text
+def parse_text(input: str, font: str | None = None, allow_color: bool = True) -> bytes:
     result = b''
+    start_sequence, end_sequence = b'', b''    # in case we have a font
     escaped = False
     i = 0
 
@@ -68,6 +75,10 @@ def parse_text(input: str) -> bytes:
         c = input[i]
 
         if escaped:
+            # make sure that when we require a start+end sequence we don't write shit after that
+            if len(end_sequence) > 0:
+                raise Exception('formatting codes are forced to be at the start and end when you want to use a font')
+            
             if c == '\\' or c == '(':
                 # backslash before = print raw
                 result += c.encode()
@@ -82,7 +93,7 @@ def parse_text(input: str) -> bytes:
             escaped = True
             i+=1
             continue
-        
+
         elif c == '(':
             # we got an opening brace, let's add the format sting instead of the real text
 
@@ -93,22 +104,42 @@ def parse_text(input: str) -> bytes:
 
             # look up the corresponding format code
             if format.lower() in formatting_codes:
-                result += formatting_codes[format.lower()]
+                code = formatting_codes[format.lower()]
             elif format.startswith("link "):
                 link = format.removeprefix("link ")
-                result += start_link(link)
+                code = start_link(link)
             else:
                 raise Exception('unknown format string at index ' + str(i))
+            
+            # make sure we are allowed to use this code
+            if not allow_color and code in COLORS:
+                raise Exception('the color \'' + format + "\' is not allowed, since colors are disabled")
+            
+            # add the code to the right list
+            if font != None:
+                # if there is already text, add it to the end list (here we assume that there will not be any text after this)
+                if len(result) > 0: end_sequence += code
+                else: start_sequence += code
+            else:
+                result += code
 
             # skip to after the closing brace
             i += format_len + 1
             continue
-
+        
+        # make sure that when we require a start+end sequence we don't write shit after that
+        if len(end_sequence) > 0:
+            raise Exception('formatting codes are forced to be at the start and end when you want to use a font')
+        
         result += c.encode()
         i+=1
     
     if escaped:
         raise Exception('you are not supposed to end with a backslash!')
+    
+    # add font if nessacary
+    if font != None:
+        result = start_sequence + pyfiglet.Figlet(font=font).renderText(result.decode()).encode() + end_sequence # end comment here to make the line even longer >:D
     
     return result
 

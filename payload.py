@@ -61,6 +61,58 @@ class Bell(Payload):
         # Make the bell sound
         printer.print(formatting.BELL)
 
+# broad text display payload, is very versatile
+# repeats every `repeat_every` milliseconds, or doesn't repeat if it is 0
+# the clean mode can be any one of clean, hide, wipe or none
+# the rgb mode can be one of blink, gradient or none
+# in case of a gradient RGB the band_size also needs to be specified
+class TextDisplay(Payload):
+    def __init__(self, payload: bytes, repeat_every: int = 0, clean_mode: str | None = None, rgb_mode: str | None = None, band_size: int = 0) -> None:
+        super().__init__()
+        self.payload = payload
+        self.last_print = 0
+        self.i = 0
+        self.repeat_every = repeat_every
+        self.prefix, self.stuffix = b'', b''
+
+        # parse clean mode
+        if clean_mode == "clean":
+            self.prefix += formatting.RESET_CURSOR + formatting.EREASE_SCREEN
+        elif clean_mode == "hide":
+            self.prefix += formatting.EXIT_INVISIBLE_MODE + formatting.RESET_CURSOR + formatting.EREASE_SCREEN
+            self.stuffix += formatting.ENTER_INVISIBLE_MODE + formatting.RESET
+        elif clean_mode == "wipe":
+            self.prefix += formatting.RESET_CONSOLE
+        elif clean_mode != None:
+            raise Exception("invlaid clean mode, please choose between clean, hide, wipe and none")
+        
+        # validate rgb mode
+        if rgb_mode not in [None, "blink", "gradient"]:
+            raise Exception("invlaid rgb mode, please choose between blink, gradient and none")
+        self.rgb_mode = rgb_mode
+        self.band_size = band_size
+
+    def tick(self, printer):
+        # if we don't care about repeating we only print once
+        if self.repeat_every == 0 and self.last_print != 0: return
+        # if we got called too soon, return
+        elif time.time() * 1000 - self.last_print < self.repeat_every: return
+
+        # apply GRB if nessacary
+        payload = self.payload
+        if self.rgb_mode == "blink":
+            code = formatting.COLORS[self.i % len(formatting.COLORS)]
+            payload = code + payload + formatting.RESET
+
+        elif self.rgb_mode == "gradient":
+            payload = b'\n'.join(rgb_gradient(payload.split(b'\n'), formatting.COLORS, self.i, self.band_size))
+            
+
+        # print the text to the console
+        printer.print(self.prefix + payload + self.stuffix)
+        self.last_print = time.time() * 1000 # store it in milliseconds
+        self.i += 1
+
 # print the text to the console, it will probably be surrounded by other text
 class PrintText(Payload):
     def __init__(self, payload) -> None:
@@ -147,7 +199,7 @@ class PrintRGBText(Payload):
         self.last_print_time = current_time
 
         # calculate next color
-        colored_lines = color_text(self.lines, formatting.COLORS, self.i, self.band_size)
+        colored_lines = rgb_gradient(self.lines, formatting.COLORS, self.i, self.band_size)
         self.i += 1
         self.i %= self.band_size * len(formatting.COLORS)
 
@@ -157,13 +209,12 @@ class PrintRGBText(Payload):
 
 ## utility functions
 
-
 # ugly code ahead, i hope to never have to debug this again
-def color_text(text: list[bytes], colors, i: int, band_size: int) -> list[bytes]:
+def rgb_gradient(text: list[bytes], colors, i: int, band_size: int) -> list[bytes]:
     result = []
     for line in text:
         # calculate where we need to start with the colors
-        current_color_index = i // band_size
+        current_color_index = i // band_size % len(colors)
         line_index = i % band_size
         new_line = colors[current_color_index] + line[:line_index]
         while len(line[line_index:]) > 0:
