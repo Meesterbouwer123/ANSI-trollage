@@ -1,4 +1,5 @@
 import time
+from typing import List
 from PIL import Image
 
 import formatting
@@ -84,19 +85,25 @@ class TextDisplay(Payload):
         self.last_print = time.time() * 1000 # store it in milliseconds
         self.i += 1
 
+# prints an image to the screen
 class ImagePayload(Payload):
-    def __init__(self, display: imagedisplay.ImageDisplay, img: str) -> None:
+    def __init__(self, display: imagedisplay.ImageDisplay, images: List[Image], delay: int | None = None) -> None:
         self.display = display
         self.did_print = False
-        self.image = Image.open(img)
+        self.images = [display.convert(image) for image in images]
+        self.delay = delay
+        self.last_print = 0
+        self.i = 0
     
     def tick(self, printer: Printer):
-        if self.did_print: return
-        self.did_print = True
+        if self.delay == None and self.last_print != 0: return
+        elif self.delay != None and time.time() * 1000 - self.last_print < self.delay: return
 
-        img = self.display.convert(image=self.image)
+        img = self.images[self.i % len(self.images)]
 
         printer.print(img)
+        self.last_print = time.time() * 1000
+        self.i += 1
 
 ## utility functions
 

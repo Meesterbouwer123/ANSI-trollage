@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ImageSequence
 
 class ImageDisplay:
     def __init__(self, w, h, priority) -> None:
@@ -53,4 +53,10 @@ class BrailleDisplay(ImageDisplay):
 
 def grayscale(image, x, y):
     pixel = image.getpixel((x, y))
+    if type(pixel) == int: return pixel
+    # calculate average
     return (pixel[0] + pixel[1] + pixel[2])/3
+
+def read_images(file: str) -> list[Image.Image]:
+    with Image.open(file) as im:
+        return ImageSequence.all_frames(im, lambda x: x) # this seems like the easiest function to use, but we need to pass a function to it. we use a stupid lambda for this

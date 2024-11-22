@@ -1,5 +1,8 @@
 import sys
 import threading
+
+import PIL
+import PIL.ImageSequence
 # our own modules
 import formatting
 import imagedisplay
@@ -215,11 +218,12 @@ def main():
                     continue
 
                 try:
-                    p = payload.ImagePayload(display, " ".join(split[i+1:]))
+                    images = imagedisplay.read_images(" ".join(split[i+2:]))
                 except Exception as e:
                     print(str(e))
                     continue
-                current_payload = p
+                
+                current_payload = payload.ImagePayload(display, images, delay=int(split[i+1]))
 
             elif command == "": pass
 
