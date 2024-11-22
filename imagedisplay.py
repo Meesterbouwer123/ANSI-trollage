@@ -13,6 +13,7 @@ class ImageDisplay:
             return image.resize((int((width / height) * self.h), self.h))
         else:
             return image.resize((self.w, self.h))
+        
     def convert(self, image: Image) -> bytes:
         pass
 

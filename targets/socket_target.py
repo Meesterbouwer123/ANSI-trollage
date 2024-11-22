@@ -12,10 +12,15 @@ with socket.socket() as s:
     while True:
         conn, addr = s.accept()
         try:
+            old = b""
             while True:
                 data = conn.recv(1024)
                 if data == None or len(data) == 0: break
-                print(data.decode())
+                try:
+                    print((old +data).decode())
+                    old = b""
+                except:
+                    old += data
         except KeyboardInterrupt: break # this will only trigger once it receives any data, i don't knwo how to fix it right now
-        except:
-            print("Client disconnected!")
+        except Exception as e:
+            print("Client disconnected! (%s)" % str(e))
