@@ -1,5 +1,8 @@
 import time
+from PIL import Image
+
 import formatting
+import imagedisplay
 from printer import Printer
 
 ## payload classes
@@ -80,6 +83,20 @@ class TextDisplay(Payload):
         printer.print(self.prefix + payload + self.stuffix)
         self.last_print = time.time() * 1000 # store it in milliseconds
         self.i += 1
+
+class ImagePayload(Payload):
+    def __init__(self, display: imagedisplay.ImageDisplay, img: str) -> None:
+        self.display = display
+        self.did_print = False
+        self.image = Image.open(img)
+    
+    def tick(self, printer: Printer):
+        if self.did_print: return
+        self.did_print = True
+
+        img = self.display.convert(image=self.image)
+
+        printer.print(img)
 
 ## utility functions
 

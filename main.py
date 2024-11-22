@@ -2,6 +2,7 @@ import sys
 import threading
 # our own modules
 import formatting
+import imagedisplay
 import printer
 import payload
 from formatting import RED, RESET, CYAN, BLUE
@@ -40,6 +41,9 @@ def get_printer() -> printer.Printer | None:
         except Exception as e:
             print("Error while setting up socket printer: %s" % str(e))
     
+    elif mode == "self":
+        return printer.SelfPrinter()
+    
     else:
         return None
 
@@ -52,6 +56,7 @@ def main():
         print("Usage: %s <printer> [options]" % sys.argv[0])
         print("Available printers:")
         print("- socket <host> <port> : plain old socket connection (aliases: sock, nc, netcat)")
+        print("- self : prints to your own console, only for testing new payloads")
         return
 
     run_thread = threading.Thread(target=payload_thread, args=(p,))
@@ -71,7 +76,7 @@ def main():
                 print(f"{RED.decode()}- {CYAN.decode()}reset {BLUE.decode()}: {CYAN.decode()}Tries to recover the console from all the previous shenanigans{RESET.decode()}")
                 print(f"{RED.decode()}- {CYAN.decode()}wipe [permanent] {BLUE.decode()}: {CYAN.decode()}Wipes the console and all the previous content on it, if permanent is selected it will keep wiping the console{RESET.decode()}")
                 print(f"{RED.decode()}- {CYAN.decode()}bell [loop <delay>] {BLUE.decode()}: {CYAN.decode()}Plays an annoying bell sound if the terminal supports it, optionally loops every <delay> milliseconds{RESET.decode()}")
-                print(f"{RED.decode()}- {CYAN.decode()}text [OPTIONS] <text> {BLUE.decode()}: {CYAN.decode()}Displays some text to the console\n  {BLUE.decode()}Using the options you can make the text big (--figlet_font), make the text be the only thing being displayed (--clean_mode) or give it RGB colors (--rgb_mode){RESET.decode()}")
+                print(f"{RED.decode()}- {CYAN.decode()}text [OPTIONS] <text> {BLUE.decode()}: {CYAN.decode()}Displays some text to the console\n  {BLUE.decode()}Using the options you can make the text big (--figlet_font), make the text be the only thing being displayed (--clean_mode and --repeat) or give it RGB colors (--rgb_mode){RESET.decode()}")
                 
             elif command == "exit":
                 print("Shutting down...")
@@ -189,6 +194,32 @@ def main():
                     continue
 
                 current_payload = payload.TextDisplay(formatted, repeat_every=repeat, clean_mode=clean, rgb_mode=rgb, band_size=band_size)
+
+            elif command.startswith("img "):
+                split = command.split(" ")
+                i = 1
+                if split[1] == "braille":
+                    try:
+                        width, height = int(split[2]), int(split[3])
+                    except:
+                        print("The width and height need to be numbers!")
+                        continue
+                    priority = split[4]
+                    if priority not in ["width", "height", "resize"]:
+                        print("Invalid priority, choose between width, heigth or resize")
+                        continue
+                    display = imagedisplay.BrailleDisplay(width, height, priority)
+                    i = 4
+                else:
+                    print("Unknown image mode")
+                    continue
+
+                try:
+                    p = payload.ImagePayload(display, " ".join(split[i+1:]))
+                except Exception as e:
+                    print(str(e))
+                    continue
+                current_payload = p
 
             elif command == "": pass
 
