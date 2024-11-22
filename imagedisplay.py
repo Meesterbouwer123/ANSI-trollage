@@ -41,7 +41,7 @@ class BrailleDisplay(ImageDisplay):
         return res
 
     def convert(self, image: Image) -> bytes:
-        image = self.resize(image)
+        image = self.resize(image).convert('1') # this conversion turns the image into black and white, the added dithering makes the images more recognizable
         result = ""
         w, h = image.size
         for y in range(0, h, 4):
