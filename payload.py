@@ -87,13 +87,26 @@ class TextDisplay(Payload):
 
 # prints an image to the screen
 class ImagePayload(Payload):
-    def __init__(self, display: imagedisplay.ImageDisplay, images: List[Image.Image], delay: int | None = None) -> None:
+    def __init__(self, display: imagedisplay.ImageDisplay, images: List[Image.Image], delay: int | None = None, clean_mode: str | None = None) -> None:
         self.display = display
         self.did_print = False
         self.images = [display.convert(image) for image in images]
         self.delay = delay
         self.last_print = 0
         self.i = 0
+
+        self.prefix, self.stuffix = b'', b''
+
+        # parse clean mode
+        if clean_mode == "clean":
+            self.prefix += formatting.RESET_CURSOR + formatting.EREASE_SCREEN
+        elif clean_mode == "hide":
+            self.prefix += formatting.EXIT_INVISIBLE_MODE + formatting.RESET_CURSOR + formatting.EREASE_SCREEN
+            self.stuffix += formatting.ENTER_INVISIBLE_MODE + formatting.RESET
+        elif clean_mode == "wipe":
+            self.prefix += formatting.RESET_CONSOLE
+        elif clean_mode != None:
+            raise Exception("invlaid clean mode, please choose between clean, hide, wipe and none")
     
     def tick(self, printer: Printer):
         if self.delay == None and self.last_print != 0: return
@@ -101,7 +114,7 @@ class ImagePayload(Payload):
 
         img = self.images[self.i % len(self.images)]
 
-        printer.print(img)
+        printer.print(self.prefix + img + self.stuffix)
         self.last_print = time.time() * 1000
         self.i += 1
 

@@ -206,6 +206,8 @@ def main():
                 mode = None
                 width = None
                 height = None
+                delay = None
+                clean_mode = None
                 while True:
                     if i >= len(split):
                         error_message = "`i` reached past the end of the list"
@@ -235,6 +237,16 @@ def main():
                             height = int(argsplit[1])
                         except:
                             error_message = "the height must be an int!"
+                    elif argsplit[0] == "delay":
+                        try:
+                            delay = int(argsplit[1])
+                        except:
+                            error_message = "the delay must be an int!"
+                    elif argsplit[0] == "clean_mode":
+                        if argsplit[1] == "none":
+                            clean_mode = None
+                        else:
+                            clean_mode = argsplit[1]
                     else:
                         error_message = "unknown argument"
                         break
@@ -258,12 +270,13 @@ def main():
                     continue
 
                 try:
+                    # this is the most time-intensive task: reading the images from disk. since we aren't in control over this we can't do shit about it
                     images = imagedisplay.read_images(" ".join(split[i:]))
                 except Exception as e:
                     print(str(e))
                     continue
                 
-                current_payload = payload.ImagePayload(display, images)
+                current_payload = payload.ImagePayload(display, images, delay=delay, clean_mode=clean_mode)
 
             elif command == "": pass
 
