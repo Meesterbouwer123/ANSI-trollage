@@ -200,30 +200,70 @@ def main():
 
             elif command.startswith("img "):
                 split = command.split(" ")
+
                 i = 1
-                if split[1] == "braille":
-                    try:
-                        width, height = int(split[2]), int(split[3])
-                    except:
-                        print("The width and height need to be numbers!")
+                error_message = None
+                mode = None
+                width = None
+                height = None
+                while True:
+                    if i >= len(split):
+                        error_message = "`i` reached past the end of the list"
+                        break
+
+                    if split[i].strip() == "": 
+                        i += 1
                         continue
-                    priority = split[4]
-                    if priority not in ["width", "height", "resize"]:
-                        print("Invalid priority, choose between width, heigth or resize")
-                        continue
-                    display = imagedisplay.BrailleDisplay(width, height, priority)
-                    i = 4
+                    elif not split[i].startswith("--"):
+                        break
+
+                    arg = split[i][2:]
+                    argsplit = arg.split("=")
+                    if len(argsplit) != 2:
+                        error_message = "all arguments must be in the form --abc=def"
+                        break
+
+                    if argsplit[0] == "mode":
+                        mode = argsplit[1]
+                    elif argsplit[0] == "width":
+                        try:
+                            width = int(argsplit[1])
+                        except:
+                            error_message = "the width must be an int!"
+                    elif argsplit[0] == "height":
+                        try:
+                            height = int(argsplit[1])
+                        except:
+                            error_message = "the height must be an int!"
+                    else:
+                        error_message = "unknown argument"
+                        break
+                    
+                    i += 1
+
+
+                if error_message != None:
+                    print(error_message)
+                    continue
+
+                if width == None and height == None:
+                    print("You didn't specify a width or height, expect the image to be larger than you initially thought")
+                elif width != None and height != None:
+                    print("Both width and height were given, expect the aspect ratio to be changed")
+
+                if mode == "braille":
+                    display = imagedisplay.BrailleDisplay(width, height)
                 else:
                     print("Unknown image mode")
                     continue
 
                 try:
-                    images = imagedisplay.read_images(" ".join(split[i+2:]))
+                    images = imagedisplay.read_images(" ".join(split[i:]))
                 except Exception as e:
                     print(str(e))
                     continue
                 
-                current_payload = payload.ImagePayload(display, images, delay=int(split[i+1]))
+                current_payload = payload.ImagePayload(display, images)
 
             elif command == "": pass
 

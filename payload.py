@@ -87,7 +87,7 @@ class TextDisplay(Payload):
 
 # prints an image to the screen
 class ImagePayload(Payload):
-    def __init__(self, display: imagedisplay.ImageDisplay, images: List[Image], delay: int | None = None) -> None:
+    def __init__(self, display: imagedisplay.ImageDisplay, images: List[Image.Image], delay: int | None = None) -> None:
         self.display = display
         self.did_print = False
         self.images = [display.convert(image) for image in images]

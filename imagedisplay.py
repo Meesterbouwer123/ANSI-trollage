@@ -1,18 +1,19 @@
 from PIL import Image, ImageSequence
 
 class ImageDisplay:
-    def __init__(self, w, h, priority) -> None:
-        self.w, self.h = w, h
-        self.priority = priority
+    def __init__(self, width: int | None, height: int | None) -> None:
+        self.w, self.h = width, height
     
     def resize (self, image: Image) -> Image:
         width, height = image.size
-        if self.priority == "width":
+        if self.w != None and self.h == None:
             return image.resize((self.w, int((height / width) * self.w)))
-        elif self.priority == "height":
+        elif self.w == None and self.h != None:
             return image.resize((int((width / height) * self.h), self.h))
-        else:
+        elif self.w != None and self.h != None:
             return image.resize((self.w, self.h))
+        else:
+            return image # no resizing needed
         
     def convert(self, image: Image) -> bytes:
         pass

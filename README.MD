@@ -32,4 +32,4 @@ Adding a new payload is also straightforward: Make a new class in payload.py tha
 ### TODO
 In case you want to contribute to this project but don't have any idea on what to add, here are some ideas:
 - [X] Sending hyperlinks using OSC 8
-- [~] Image and GIF rendering. (partially done, I want to add more display formats and the command usage sucks right now)
+- [X] Image and GIF rendering. (technically done, but I want to add more display formats)
