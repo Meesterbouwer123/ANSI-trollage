@@ -163,3 +163,6 @@ def start_link(url: str | bytes):
 
 def format_link(url: str | bytes, text: bytes):
     return start_link(url) + text + OSC8_LINK_END
+
+def color(color: tuple) -> bytes:
+    return ANSI_ESC + f"[48;2;{str(color[0])};{str(color[1])};{str(color[2])}m".encode()

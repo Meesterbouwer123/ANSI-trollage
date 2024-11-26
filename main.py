@@ -79,7 +79,10 @@ def main():
                 print(f"{RED.decode()}- {CYAN.decode()}reset {BLUE.decode()}: {CYAN.decode()}Tries to recover the console from all the previous shenanigans{RESET.decode()}")
                 print(f"{RED.decode()}- {CYAN.decode()}wipe [permanent] {BLUE.decode()}: {CYAN.decode()}Wipes the console and all the previous content on it, if permanent is selected it will keep wiping the console{RESET.decode()}")
                 print(f"{RED.decode()}- {CYAN.decode()}bell [loop <delay>] {BLUE.decode()}: {CYAN.decode()}Plays an annoying bell sound if the terminal supports it, optionally loops every <delay> milliseconds{RESET.decode()}")
-                print(f"{RED.decode()}- {CYAN.decode()}text [OPTIONS] <text> {BLUE.decode()}: {CYAN.decode()}Displays some text to the console\n  {BLUE.decode()}Using the options you can make the text big (--figlet_font), make the text be the only thing being displayed (--clean_mode and --repeat) or give it RGB colors (--rgb_mode){RESET.decode()}")
+                print(f"{RED.decode()}- {CYAN.decode()}text [OPTIONS] <text> {BLUE.decode()}: {CYAN.decode()}Displays some text to the console{RESET.decode()}")
+                print(f"  {BLUE.decode()}Options: --figlet_font, --clean_mode, --repeat, --rgb_mode")
+                print(f"{RED.decode()}- {CYAN.decode()}img [OPTIONS] <file> {BLUE.decode()}: {CYAN.decode()}Displays an image to the targets screen.{RESET.decode()}")
+                print(f"  {BLUE.decode()}Options: --mode (required), --clean_mode, --delay, --width/--height (to specify the dimensions, tries to preserver aspect ratio)")
                 
             elif command == "exit":
                 print("Shutting down...")
@@ -210,7 +213,7 @@ def main():
                 clean_mode = None
                 while True:
                     if i >= len(split):
-                        error_message = "`i` reached past the end of the list"
+                        error_message = "you also need the file path dummy"
                         break
 
                     if split[i].strip() == "": 
@@ -265,6 +268,8 @@ def main():
 
                 if mode == "braille":
                     display = imagedisplay.BrailleDisplay(width, height)
+                elif mode == "ascii":
+                    display = imagedisplay.AsciiDisplay(width, height)
                 else:
                     print("Unknown image mode")
                     continue

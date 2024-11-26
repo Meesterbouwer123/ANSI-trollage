@@ -1,5 +1,7 @@
 from PIL import Image, ImageSequence
 
+import formatting
+
 class ImageDisplay:
     def __init__(self, width: int | None, height: int | None) -> None:
         self.w, self.h = width, height
@@ -17,7 +19,6 @@ class ImageDisplay:
         
     def convert(self, image: Image) -> bytes:
         pass
-
 
 class BrailleDisplay(ImageDisplay):
     def braille_char(self, image: Image, x, y) -> str:
@@ -51,6 +52,36 @@ class BrailleDisplay(ImageDisplay):
                 result += self.braille_char(image, x, y)
             result += "\n"
         return result.encode()
+
+class AsciiDisplay(ImageDisplay):
+    def __init__(self, width: int | None, height: int | None) -> None:
+        super().__init__(width, height)
+
+        # from https://paulbourke.net/dataformats/asciiart/
+        self.ramp = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. "[::-1]
+
+    def convert(self, image: Image) -> bytes:
+        image = self.resize(image).convert('RGB')
+        result = b""
+        w, h = image.size
+        for y in range(h):
+            last_color = None
+            for x in range(w):
+                pixel = image.getpixel((x, y))
+                brightness = grayscale(image, x, y)
+                char = self.ramp[int(brightness/256.0 * len(self.ramp))]
+
+                # basic redundancy avoidance
+                color = formatting.color(pixel)
+                if last_color != color:
+                    result += color
+                
+                result += char.encode()
+
+                last_color = color
+
+            result += formatting.RESET + b"\n"
+        return result
 
 def grayscale(image, x, y):
     pixel = image.getpixel((x, y))
