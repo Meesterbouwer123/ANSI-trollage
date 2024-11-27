@@ -69,6 +69,7 @@ def main():
     try:
         while running:
             # execute command
+            #TODO: extract this to its own function
             command = input(f"{RED.decode()}ANSI{CYAN.decode()}> {RESET.decode()}")
             if command == "help":
                 # i hate python with its bytes

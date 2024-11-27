@@ -9,6 +9,8 @@ from printer import Printer
 ## payload classes
 
 # base class
+# A payload is an abstraction layer for *something* you can do with ANSI injection. 
+# There is usually 1 payload per command, but sometimes multiple commands share the same payload (if the logic is similar enough)
 class Payload:
     # this function will be called continiously, in here you will do your shenanigans
     def tick(self, printer: Printer): pass

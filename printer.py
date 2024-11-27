@@ -1,5 +1,7 @@
 import socket
 
+# A base printer, this is the abstraction we use for an ANSI injection vulnerability
+# The `print` methods pupose is to print some raw bytes to the targets console window, other parts assume that the bytes show up *during* the function, or shortly thereafter (to give the right timings)
 class Printer:
     # print the bytes to the target's console
     def print(self, bytes: bytes):
