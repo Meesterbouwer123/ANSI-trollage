@@ -7,20 +7,6 @@ If you manage to find this useful, please let me know :D
 2. ???????????
 3. profit
 
-## Text formatting:
-The idea is to have the normal text with style formattings in the middle. These style formattings will be words describing what formatting you want, placed between ( and ). To get an opening round bracket in the text you need to escape it with a backslash `\(`, an ending bracked doesn't need to be escaped. A backslash can be placed by escaping it again (like `\\`). 
-
-The final result will be in UTF-8 (maybe we can make this be decided by the printer later).
-
-Some examples:
-```
-(red)
-(reset) and (wipe)
-(link https://example.com) and (nolink)
-(bell)
-(CRLF)
-```
-
 ## For programmers:
 ### How can I make this exploit software X?
 If you want to add a new exploit to this tool you need to make a new printer (see `printer.py`).
@@ -43,9 +29,19 @@ Once you are done adding or extending a payload, you need to make a command for 
 
 ### IDK what to add, where can I help?
 We have a small backlog of ideas in case you want to contribute:
-- [ ] More image display modes (for example sixel, halfblocks).
+- [ ] Crash terminal emulators
+- [ ] Run commands on the target's pc (there are a lot of RCEs).
+- [ ] Scripting support (just executing the commands in a file line-by-line)
 - [ ] Cache image conversions so frames that look the same will not be computed twice.
 - [ ] Fix image aspect ratios (especially on the ascii mode).
-- [ ] Weren't there sequences that could crash terminal emulators?
-- [ ] Scripting support (just executing the commands in a file line-by-line)
+- [ ] More image display modes (for example sixel, halfblocks).
+- [ ] Plugin system to support private printers/payloads (we don't want to accidentally leak zerodays).
 - [ ] Music playing maybe (probably not)
+
+## references
+In case you want to learn more about ANSI exploitation, here is a list of links that may or may not be useful:
+- https://dgl.cx/2023/09/ansi-terminal-security
+- https://github.com/dgl/vt-houdini
+- https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+- https://www.cyberark.com/resources/threat-research-blog/dont-trust-this-title-abusing-terminal-emulators-with-ansi-escape-characters
+- https://www.proteansec.com/linux/blast-past-executing-code-terminal-emulators-via-escape-sequences/
