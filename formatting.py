@@ -166,3 +166,6 @@ def format_link(url: str | bytes, text: bytes):
 
 def color(color: tuple) -> bytes:
     return ANSI_ESC + f"[48;2;{str(color[0])};{str(color[1])};{str(color[2])}m".encode()
+
+def repreat_char(n: int) -> bytes:
+    return ANSI_ESC + b"[" + str(n).encode() + b';b' + ANSI_ST
