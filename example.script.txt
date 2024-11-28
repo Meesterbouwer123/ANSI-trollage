@@ -1,3 +1,10 @@
+reset
 text hi
-img --mode=braille images/88x31.png
-text --abc=def
+wait
+img --mode=ascii --delay=70 --width=50 images/rickroll.gif
+echo waiting 
+wait
+echo done
+wipe
+reset
+wait 3000

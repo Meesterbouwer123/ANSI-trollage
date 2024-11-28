@@ -1,5 +1,6 @@
 import sys
 import threading
+import time
 from typing import List
 
 import PIL
@@ -269,6 +270,27 @@ def handle_command(command: str, stack: list[tuple[str, int]] = []):
             error = handle_command(line, stack=stack + [(path, i)])
             if error != None:
                 return error + "\n at " + path + " line " + str(i+1) + ": " + line
+
+    elif command == "wait" or command.startswith("wait "):
+        split = command.split(" ")
+        if len(split) == 1:
+            max_duration = None
+        elif len(split) == 2:
+            try:
+                max_duration = int(split[1])
+            except:
+                return "the duration msut be a number!"
+        else:
+            return "Incorrect usage"
+        
+        start = time.time() * 1000
+        # loop until the current payload is done or we timed out
+        while not current_payload.is_done():
+            if max_duration != None and time.time()*1000 - start > max_duration:
+                break # timed out
+
+    elif command.startswith("echo "):
+        print(command.removeprefix("echo "))
 
     elif command == "": pass
 

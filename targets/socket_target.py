@@ -17,7 +17,7 @@ with socket.socket() as s:
                 data = conn.recv(1024) # read blocks of 1024 bytes
                 if data == None or len(data) == 0: break
                 try:
-                    print((old + data).decode(), end='') # print the raw bytes to the screen
+                    print((old + data).decode(), end='', flush=True) # print the raw bytes to the screen
                     old = b""
                 except:
                     old += data

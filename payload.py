@@ -15,6 +15,10 @@ class Payload:
     # this function will be called continiously, in here you will do your shenanigans
     def tick(self, printer: Printer): pass
 
+    # notifies when this payload considers itself "done", is used in the `wait` command
+    def is_done(self) -> bool:
+        return False
+
 # prints the raw byte sequence directly to the console
 # if the delay is not None, it will repeat every `delay` milliseconds
 class RawPayload(Payload):
@@ -34,6 +38,10 @@ class RawPayload(Payload):
         printer.print(self.payload)
 
         self.last_print = time.time() * 1000
+    
+    def is_done(self):
+        # we are "done" if we are not supposed to loop anymore
+        return self.delay == None and self.last_print != 0
 
 # broad text display payload, is very versatile
 # repeats every `repeat_every` milliseconds, or doesn't repeat if it is 0
@@ -86,6 +94,10 @@ class TextDisplay(Payload):
         printer.print(self.prefix + payload + self.stuffix)
         self.last_print = time.time() * 1000 # store it in milliseconds
         self.i += 1
+    
+    def is_done(self) -> bool:
+        # we are done if we are done with sending the message
+        return self.repeat_every == 0 and self.last_print != 0
 
 # prints an image to the screen
 class ImagePayload(Payload):
@@ -119,6 +131,10 @@ class ImagePayload(Payload):
         printer.print(self.prefix + img + self.stuffix)
         self.last_print = time.time() * 1000
         self.i += 1
+    
+    def is_done(self) -> bool:
+        # if we did 1 full loop we are done
+        return self.i >= len(self.images)
 
 ## utility functions
 
