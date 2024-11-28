@@ -65,9 +65,13 @@ def handle_command(command: str, stack: list[tuple[str, int]] = []):
         print(f"{RED.decode()}- {CYAN.decode()}wipe [permanent] {BLUE.decode()}: {CYAN.decode()}Wipes the console and all the previous content on it, if permanent is selected it will keep wiping the console{RESET.decode()}")
         print(f"{RED.decode()}- {CYAN.decode()}bell [loop <delay>] {BLUE.decode()}: {CYAN.decode()}Plays an annoying bell sound if the terminal supports it, optionally loops every <delay> milliseconds{RESET.decode()}")
         print(f"{RED.decode()}- {CYAN.decode()}text [OPTIONS] <text> {BLUE.decode()}: {CYAN.decode()}Displays some text to the console{RESET.decode()}")
-        print(f"  {BLUE.decode()}Options: --figlet_font, --clean_mode, --repeat, --rgb_mode")
+        print(f"  {BLUE.decode()}Options: --figlet_font, --clean_mode, --repeat, --rgb_mode{RESET.decode()}")
         print(f"{RED.decode()}- {CYAN.decode()}img [OPTIONS] <file> {BLUE.decode()}: {CYAN.decode()}Displays an image to the targets screen.{RESET.decode()}")
-        print(f"  {BLUE.decode()}Options: --mode (required), --clean_mode, --delay, --width/--height (to specify the dimensions, tries to preserver aspect ratio)")
+        print(f"  {BLUE.decode()}Options: --mode (required), --clean_mode, --delay, --width/--height (to specify the dimensions, tries to preserve aspect ratio){RESET.decode()}")
+        print(f"{RED.decode()}- {CYAN.decode()}crash <mode> {BLUE.decode()}: {CYAN.decode()}Attempts to crash the target{RESET.decode()}")
+        print(f"  {BLUE.decode()}Modes: repeat, (TODO: add more){RESET.decode()}")
+        print(f"{RED.decode()}- {CYAN.decode()}script <file> {BLUE.decode()}: {CYAN.decode()}Runs all the commands in the specified file{RESET.decode()}")
+        print(f"{RED.decode()}- {CYAN.decode()}wait [timeout_ms] {BLUE.decode()}: {CYAN.decode()}Waits until the currently running payload is done, or the timeout was exceeded (great for scripting){RESET.decode()}")
         
     elif command == "exit":
         print("Shutting down...")
@@ -300,7 +304,7 @@ def handle_command(command: str, stack: list[tuple[str, int]] = []):
             # widnows terminal limits to 65536, vscode to 32767
             sequence = '✌'.encode() + formatting.repreat_char(1000000000)
             current_payload = payload.RawPayload(sequence)
-            
+
         else:
             return "Unknown crash mode!"
 

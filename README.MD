@@ -29,9 +29,9 @@ Once you are done adding or extending a payload, you need to make a command for 
 
 ### IDK what to add, where can I help?
 We have a small backlog of ideas in case you want to contribute:
-- [ ] Crash terminal emulators
+- [ ] Crash terminal emulators (beginning has been made, looking for working crashes)
 - [ ] Run commands on the target's pc (there are a lot of RCEs).
-- [ ] Scripting support (just executing the commands in a file line-by-line)
+- [X] Scripting support (just executing the commands in a file line-by-line)
 - [ ] Cache image conversions so frames that look the same will not be computed twice.
 - [ ] Fix image aspect ratios (especially on the ascii mode).
 - [ ] More image display modes (for example sixel, halfblocks).
@@ -45,3 +45,4 @@ In case you want to learn more about ANSI exploitation, here is a list of links 
 - https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
 - https://www.cyberark.com/resources/threat-research-blog/dont-trust-this-title-abusing-terminal-emulators-with-ansi-escape-characters
 - https://www.proteansec.com/linux/blast-past-executing-code-terminal-emulators-via-escape-sequences/
+- https://www.youtube.com/watch?v=opW_Q7jvSbc
