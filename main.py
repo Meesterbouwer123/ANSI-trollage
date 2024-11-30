@@ -46,6 +46,22 @@ def get_printer() -> printer.Printer | None:
         except Exception as e:
             print("Error while setting up socket printer: %s" % str(e))
     
+    elif mode == "mc" or mode == "handshake":
+        if len(sys.argv) != 4: return None
+        host = sys.argv[2]
+        try: 
+            port = int(sys.argv[3])
+        except:
+            print("ERROR: port must be a number")
+            return None
+        
+        # connect to the server and return this printer
+        try:
+            p = printer.McHandshakePrinter((host, port))
+            return p
+        except Exception as e:
+            print("Error while setting up minecraft handshake printer: %s" % str(e))
+    
     elif mode == "self":
         return printer.SelfPrinter()
     
@@ -66,6 +82,7 @@ def handle_command(command: str, stack: list[tuple[str, int]] = []):
         print(f"{RED.decode()}- {CYAN.decode()}bell [loop <delay>] {BLUE.decode()}: {CYAN.decode()}Plays an annoying bell sound if the terminal supports it, optionally loops every <delay> milliseconds{RESET.decode()}")
         print(f"{RED.decode()}- {CYAN.decode()}text [OPTIONS] <text> {BLUE.decode()}: {CYAN.decode()}Displays some text to the console{RESET.decode()}")
         print(f"  {BLUE.decode()}Options: --figlet_font, --clean_mode, --repeat, --rgb_mode{RESET.decode()}")
+        print(f"{RED.decode()}- {CYAN.decode()}file <file {BLUE.decode()}: {CYAN.decode()}Uploads the raw file to the target, great for sharing big text files{RESET.decode()}")
         print(f"{RED.decode()}- {CYAN.decode()}img [OPTIONS] <file> {BLUE.decode()}: {CYAN.decode()}Displays an image to the targets screen.{RESET.decode()}")
         print(f"  {BLUE.decode()}Options: --mode (required), --clean_mode, --delay, --width/--height (to specify the dimensions, tries to preserve aspect ratio){RESET.decode()}")
         print(f"{RED.decode()}- {CYAN.decode()}crash <mode> {BLUE.decode()}: {CYAN.decode()}Attempts to crash the target{RESET.decode()}")
@@ -181,6 +198,16 @@ def handle_command(command: str, stack: list[tuple[str, int]] = []):
             return "Error while parsing text: " + e.args[0]
 
         current_payload = payload.TextDisplay(formatted, repeat_every=repeat, clean_mode=clean, rgb_mode=rgb, band_size=band_size)
+
+    elif command.startswith("file "):
+        file = command.removeprefix("file ")
+        try:
+            with open(file) as f:
+                data = f.read()
+        except FileNotFoundError:
+            return "file does not exist"
+        
+        current_payload = payload.TextDisplay(data.encode())
 
     elif command.startswith("img "):
         split = command.split(" ")
@@ -312,7 +339,6 @@ def handle_command(command: str, stack: list[tuple[str, int]] = []):
 
     else:
         return "Unknown command '%s'" % command
-
 
 def main():
     global running, current_payload

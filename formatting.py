@@ -60,6 +60,8 @@ formatting_codes = {
 
     # not ANSI, but may still be useful
     "crlf": b"\r\n",
+    "cr": b"\r",
+    "lf": b"\n",
     "nop": b'', # does literally nothing, can be useful to start the payload with whitespace
 }
 
@@ -83,7 +85,7 @@ def parse_text(input: str, font: str | None = None, allow_color: bool = True) ->
                 # backslash before = print raw
                 result += c.encode()
             else:
-                raise Exception('invalid escape character \'' + c + '\' at index ' + i)
+                raise Exception('invalid escape character \'' + c + '\' at index ' + str(i))
             
             escaped = False
             i+=1
